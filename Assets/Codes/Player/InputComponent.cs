@@ -3,10 +3,16 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(CharacterController))]
 public class InputComponent : MonoBehaviour
 {
     [Header("Events")]
-    public UnityEvent OnShoot;
+    public UnityEvent OnShootingStarted;
+    public UnityEvent OnShootingFinished;
+    public UnityEvent OnMovementStarted;
+    public UnityEvent OnMovementFinished;
+    public UnityEvent OnAimingStarted;
+    public UnityEvent OnAimingFinished;
 
     [Space()]
     [Header("Modifiers")]
@@ -46,9 +52,10 @@ public class InputComponent : MonoBehaviour
         moveAction.canceled += OnMoveCanceled;
 
         aimAction.started += OnAimStarted;
-        aimAction.started += OnAimCanceled;
+        aimAction.canceled += OnAimCanceled;
 
         interactAction.started += OnInteractStarted;
+        interactAction.canceled += OnInteractCanceled;
     }
 
     // Update is called once per frame
@@ -61,11 +68,25 @@ public class InputComponent : MonoBehaviour
         }
     }
 
+    private void OnInteractCanceled(InputAction.CallbackContext context)
+    {
+        if (isAiming)
+        {
+            isShooting = false;
+            OnShootingFinished?.Invoke();
+        }
+        else
+        {
+            // interact
+        }
+    }
+
     private void OnInteractStarted(InputAction.CallbackContext obj)
     {
         if (isAiming)
         {
-            OnShoot?.Invoke();
+            isShooting = true;
+            OnShootingStarted?.Invoke();
         }
         else
         {
@@ -84,11 +105,13 @@ public class InputComponent : MonoBehaviour
     private void OnAimCanceled(InputAction.CallbackContext context)
     {
         isAiming = false;
+        OnAimingFinished?.Invoke();
     }
 
     private void OnAimStarted(InputAction.CallbackContext context)
     {
         isAiming = true;
+        OnAimingStarted?.Invoke();
         isMoving = false;
     }
 
@@ -98,6 +121,7 @@ public class InputComponent : MonoBehaviour
             return;
 
         isMoving = false;
+        OnMovementFinished?.Invoke();
     }
 
     private void OnMoveStarted(InputAction.CallbackContext obj)
@@ -106,6 +130,7 @@ public class InputComponent : MonoBehaviour
             return;
 
         isMoving = true;
+        OnMovementStarted?.Invoke();
     }
 
     private void Aim()
