@@ -112,23 +112,16 @@ public class InputComponent : MonoBehaviour
     {
         isAiming = true;
         OnAimingStarted?.Invoke();
-        isMoving = false;
     }
 
     private void OnMoveCanceled(InputAction.CallbackContext context)
     {
-        if (isAiming)
-            return;
-
         isMoving = false;
         OnMovementFinished?.Invoke();
     }
 
     private void OnMoveStarted(InputAction.CallbackContext obj)
     {
-        if (isAiming)
-            return;
-
         isMoving = true;
         OnMovementStarted?.Invoke();
     }
@@ -146,6 +139,13 @@ public class InputComponent : MonoBehaviour
         if (isMoving)
         {
             Vector2 input = moveAction.ReadValue<Vector2>().normalized;
+
+            if (isAiming)
+            {
+                transform.Rotate(Vector3.up, input.x);
+                return;
+            }
+
             FindRealForwardDirection(currentFixedCamera.transform, out Vector3 camForward, out Vector3 camRight);
             Vector3 movementDir = (camForward * input.y + camRight * input.x) * movementSpeed * Time.deltaTime;
 
