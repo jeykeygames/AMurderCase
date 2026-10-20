@@ -8,6 +8,11 @@ public class FixedCameraPlayer : MonoBehaviour
     [SerializeField]
     private Weapon weapon;
 
+    [Space()]
+    [Header("Player Properties")]
+    [SerializeField]
+    private Transform playerBody;
+
     private HealthSystem healthSystem;
     private InputComponent inputComponent;
     private Animator animator;
@@ -119,7 +124,7 @@ public class FixedCameraPlayer : MonoBehaviour
     {
         if (weapon && canShoot)
         {
-            weapon.Shoot();
+            weapon.Shoot(playerBody.transform.forward);
             animator.SetTrigger("IsShooting");
             canShoot = false;
         }
